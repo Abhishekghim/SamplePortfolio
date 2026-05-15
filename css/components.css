@@ -1,0 +1,76 @@
+/* css/components.css */
+
+/* ── Custom cursor ── */
+#cursor-dot {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--glow);
+  transform: translate(-50%,-50%);
+  mix-blend-mode: screen;
+  box-shadow: 0 0 12px var(--glow);
+  transition: width 0.15s, height 0.15s, background 0.2s;
+}
+#cursor-glow {
+  position: fixed;
+  z-index: 9998;
+  pointer-events: none;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,212,255,0.3);
+  transform: translate(-50%,-50%);
+  transition: left 0.1s ease, top 0.1s ease, width 0.2s, height 0.2s;
+}
+body.cursor-hover #cursor-dot  { width: 20px; height: 20px; background: var(--accent); }
+body.cursor-hover #cursor-glow { width: 46px; height: 46px; }
+
+/* ── Depth HUD ── */
+#depth-hud {
+  position: fixed;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+#depth-label {
+  font-family: var(--font-hand);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(0,212,255,0.38);
+  writing-mode: vertical-rl;
+  text-transform: uppercase;
+}
+#depth-bar-track {
+  width: 3px; height: 130px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+#depth-bar-fill {
+  width: 100%; height: 0%;
+  background: linear-gradient(to bottom, var(--sky-top), var(--glow), #003366);
+  border-radius: 3px;
+  transition: height 0.14s;
+}
+#depth-readout {
+  font-family: var(--font-hand);
+  font-size: 9px;
+  color: rgba(0,212,255,0.42);
+  letter-spacing: 0.1em;
+}
+#depth-zone {
+  font-family: var(--font-hand);
+  font-size: 8px;
+  color: rgba(0,212,255,0.28);
+  letter-spacing: 0.12em;
+  writing-mode: vertical-rl;
+  text-transform: uppercase;
+  max-height: 80px;
+  overflow: hidden;
+}

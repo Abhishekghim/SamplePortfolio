@@ -1,0 +1,51 @@
+/* css/diver.css */
+#diver {
+  position: fixed;
+  left: 50%;
+  top: 15vh;
+  z-index: 30;
+  pointer-events: none;
+  transform: translateX(-50%);
+  will-change: top, left, transform;
+  filter: drop-shadow(0 4px 16px rgba(0,80,160,0.55));
+}
+#diver svg {
+  width: 86px;
+  transition: filter 0.6s;
+}
+
+/* Bubble animations */
+.db { animation: diverBubble ease-out infinite; }
+.db:nth-child(1) { animation-duration: 2.0s; animation-delay: 0s; }
+.db:nth-child(2) { animation-duration: 2.4s; animation-delay: 0.5s; }
+.db:nth-child(3) { animation-duration: 2.8s; animation-delay: 1.0s; }
+.db:nth-child(4) { animation-duration: 3.2s; animation-delay: 1.5s; }
+@keyframes diverBubble {
+  0%   { opacity: 0.8; transform: translateY(0) scale(1); }
+  100% { opacity: 0;   transform: translateY(-32px) scale(1.35); }
+}
+
+/* Trail bubbles container */
+#diver-trail {
+  position: absolute;
+  top: 60px; left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.trail-b {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.28);
+  background: radial-gradient(circle at 35% 32%, rgba(255,255,255,0.22), transparent);
+  animation: trailRise ease-out forwards;
+}
+@keyframes trailRise {
+  0%   { opacity: 0.7; transform: translateY(0) translateX(var(--tx,0px)); }
+  100% { opacity: 0;   transform: translateY(-90px) translateX(var(--tx,0px)); }
+}
+
+/* Depth fade — gets dimmer as diver goes deeper */
+#diver.zone-mid  svg { filter: brightness(0.78) blur(0px); }
+#diver.zone-deep svg { filter: brightness(0.52) blur(0.4px); }
+#diver.zone-abyss svg { filter: brightness(0.30) blur(0.8px); }
+#diver.zone-void svg { filter: brightness(0.12) blur(1.2px); opacity: 0.4; }

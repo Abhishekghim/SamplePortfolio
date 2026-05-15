@@ -1,0 +1,250 @@
+/* css/ocean.css — ambient background layers */
+
+#ocean-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* ── Sky / depth overlay ── */
+#layer-sky {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  transition: background 0.12s;
+}
+
+/* ── Sunlight rays ── */
+#layer-rays {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 60vh;
+  overflow: hidden;
+  transition: opacity 0.3s;
+}
+.ray {
+  position: absolute;
+  top: -8%;
+  transform-origin: top center;
+  background: linear-gradient(to bottom, rgba(135,210,240,0.18), transparent);
+  border-radius: 50%;
+  animation: rayPulse ease-in-out infinite;
+}
+@keyframes rayPulse {
+  0%,100% { opacity: 0; transform: rotate(var(--a)) scaleX(1); }
+  50%      { opacity: var(--op); transform: rotate(calc(var(--a) + 5deg)) scaleX(1.45); }
+}
+
+/* ── Haze parallax layers ── */
+#layer-haze-1,
+#layer-haze-2 {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+#layer-haze-1 {
+  background: radial-gradient(ellipse 80% 40% at 30% 60%, rgba(0,80,120,0.06), transparent);
+  animation: hazeDrift 18s ease-in-out infinite;
+}
+#layer-haze-2 {
+  background: radial-gradient(ellipse 60% 35% at 70% 40%, rgba(0,60,100,0.05), transparent);
+  animation: hazeDrift 24s ease-in-out infinite reverse;
+}
+@keyframes hazeDrift {
+  0%,100% { transform: translateX(0) translateY(0); }
+  33%      { transform: translateX(2%) translateY(-1.5%); }
+  66%      { transform: translateX(-1.5%) translateY(1%); }
+}
+
+/* ── Bubbles ── */
+#layer-bubbles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.bubble {
+  position: absolute;
+  bottom: -60px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: radial-gradient(circle at 35% 28%, rgba(255,255,255,0.22), rgba(100,190,220,0.04));
+  animation: bubbleRise linear infinite;
+  pointer-events: none;
+}
+@keyframes bubbleRise {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  8%   { opacity: 0.85; }
+  92%  { opacity: 0.4; }
+  100% { transform: translateY(-105vh) translateX(var(--bx)) scale(1.06); opacity: 0; }
+}
+
+/* ── Floating particles ── */
+#layer-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  animation: particleDrift ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes particleDrift {
+  0%,100% { transform: translateY(0) translateX(0); opacity: 0.1; }
+  50%      { transform: translateY(-22px) translateX(var(--px)); opacity: 0.55; }
+}
+
+/* ── Mouse spotlight (deep zones) ── */
+/* ── Ruins silhouettes ── */
+.ruins-silhouette {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 3;
+  color: #060f1c;
+}
+.ruins-svg {
+  width: 100%;
+  display: block;
+}
+
+/* ── Surface effects ── */
+.surface-caustics {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse 60% 25% at 50% 5%, rgba(255,248,210,0.38), transparent),
+    radial-gradient(ellipse 40% 18% at 50% 2%, rgba(255,255,255,0.15), transparent);
+  animation: causticShift 7s ease-in-out infinite;
+}
+@keyframes causticShift {
+  0%,100% { opacity: 0.8; transform: scaleX(1); }
+  50%      { opacity: 1;   transform: scaleX(1.04); }
+}
+.surface-shimmer {
+  position: absolute;
+  top: 0; left: -10%;
+  width: 120%; height: 35%;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(110deg,
+    transparent 25%,
+    rgba(180,230,255,0.07) 40%,
+    rgba(255,255,255,0.04) 50%,
+    transparent 65%);
+  animation: shimmerMove 8s ease-in-out infinite;
+}
+@keyframes shimmerMove {
+  0%,100% { transform: translateX(-5%) skewX(-3deg); }
+  50%      { transform: translateX(5%) skewX(3deg); }
+}
+
+/* ── Fish school dots ── */
+.fish-school {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+}
+.fish-dot {
+  position: absolute;
+  width: 6px; height: 3px;
+  background: rgba(120,180,210,0.45);
+  border-radius: 50%;
+  animation: fishMove linear infinite;
+}
+@keyframes fishMove {
+  0%   { transform: translateX(0) translateY(0); }
+  25%  { transform: translateX(18px) translateY(-7px); }
+  50%  { transform: translateX(9px) translateY(-14px); }
+  75%  { transform: translateX(28px) translateY(-9px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+/* ── Bioluminescent field ── */
+#biolume-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.bio-dot {
+  position: absolute;
+  border-radius: 50%;
+  animation: bioPulse ease-in-out infinite;
+}
+@keyframes bioPulse {
+  0%,100% { opacity: 0.06; transform: scale(1); }
+  50%      { opacity: 0.9;  transform: scale(1.9); }
+}
+
+/* ── Angler fish lure ── */
+#angler-lure {
+  position: absolute;
+  top: 8%; left: 12%;
+  z-index: 4;
+  pointer-events: none;
+  animation: anglerSway 3.8s ease-in-out infinite;
+}
+#angler-stem {
+  width: 2px; height: 64px;
+  background: rgba(255,255,255,0.1);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+#angler-orb {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  margin: 0 auto;
+  background: radial-gradient(circle, #fff9a0, #ffcc00, transparent);
+  box-shadow: 0 0 24px 10px rgba(255,220,0,0.45);
+  animation: anglerGlow 1.7s ease-in-out infinite;
+}
+@keyframes anglerSway {
+  0%,100% { transform: translateY(0) rotate(-7deg); }
+  50%      { transform: translateY(16px) rotate(7deg); }
+}
+@keyframes anglerGlow {
+  0%,100% { box-shadow: 0 0 22px 8px rgba(255,215,0,0.38); }
+  50%      { box-shadow: 0 0 42px 18px rgba(255,215,0,0.72); }
+}
+
+/* ── Void creatures ── */
+#void-creatures { position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; }
+.void-creature {
+  position: absolute;
+  font-size: 64px;
+  opacity: 0.05;
+  filter: blur(1.5px);
+  animation: creatureWander ease-in-out infinite;
+}
+@keyframes creatureWander {
+  0%,100% { transform: translate(0,0); }
+  33%      { transform: translate(22px,-16px); }
+  66%      { transform: translate(-16px,12px); }
+}
+
+/* ── Jellyfish hint ── */
+.jelly-hint {
+  position: absolute;
+  top: calc(var(--nav-h) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-hand);
+  font-size: 0.88rem;
+  color: rgba(180,120,255,0.55);
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  animation: hintBlink 3.5s ease-in-out infinite;
+}
+@keyframes hintBlink { 0%,100%{opacity:0.2} 50%{opacity:0.8} }

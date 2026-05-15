@@ -1,0 +1,244 @@
+/* css/animations.css — rich content reveal animations */
+
+/* ═══════════════════════════════════════
+   REVEAL BASE STATES
+═══════════════════════════════════════ */
+.reveal-up,
+.reveal-left,
+.reveal-right,
+.reveal-scale,
+.reveal-fade,
+.reveal-drop {
+  opacity: 0;
+}
+
+/* Specific transform per type */
+.reveal-up    { transform: translateY(50px); }
+.reveal-left  { transform: translateX(-56px); }
+.reveal-right { transform: translateX(56px); }
+.reveal-scale { transform: scale(0.82) translateY(24px); }
+.reveal-fade  { /* opacity only */ }
+.reveal-drop  { transform: translateY(-40px) rotate(-3deg); }
+
+/* Transition — overridden by JS delay per element */
+.reveal-up, .reveal-left, .reveal-right, .reveal-scale, .reveal-fade, .reveal-drop {
+  transition:
+    opacity  0.9s cubic-bezier(0.16,1,0.3,1),
+    transform 0.9s cubic-bezier(0.16,1,0.3,1),
+    filter   0.9s ease;
+}
+
+/* ── Revealed ── */
+.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* ═══════════════════════════════════════
+   HERO ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes nameGlow {
+  0%,100% {
+    text-shadow:
+      0 0  60px rgba(110,200,235,0.38),
+      0 4px 28px rgba(0,0,0,0.5);
+  }
+  50% {
+    text-shadow:
+      0 0 110px rgba(110,200,235,0.82),
+      0 0  40px rgba(80,180,220,0.35),
+      0 4px 28px rgba(0,0,0,0.5);
+  }
+}
+.hero-name { animation: nameGlow 4.5s ease-in-out infinite 2.2s; }
+
+@keyframes heroBadgeFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+.depth-badge { animation: heroBadgeFloat 3s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════
+   TIMELINE CARD ANIMATIONS
+═══════════════════════════════════════ */
+.tl-card {
+  transition:
+    transform 0.4s cubic-bezier(0.2,0,0.1,1),
+    box-shadow 0.4s ease,
+    border-color 0.4s ease;
+}
+.tl-card:hover {
+  transform: translateY(-5px) scale(1.015);
+  box-shadow: 0 12px 50px rgba(0,212,255,0.1), 0 4px 20px rgba(0,0,0,0.4);
+  border-color: rgba(0,212,255,0.28);
+}
+
+/* Timeline dot pulse */
+.tl-dot-inner {
+  animation: dotPulse 2.4s ease-in-out infinite;
+}
+@keyframes dotPulse {
+  0%,100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.35); box-shadow: 0 0 10px rgba(0,212,255,0.7); }
+}
+
+/* ═══════════════════════════════════════
+   SKILL CATEGORY REVEAL
+═══════════════════════════════════════ */
+.skill-cat {
+  transform-origin: center bottom;
+  transition:
+    filter    0.5s ease,
+    transform 0.4s ease,
+    box-shadow 0.4s ease,
+    border-color 0.4s ease;
+}
+.skill-cat:hover {
+  transform: translateY(-6px) scale(1.012);
+  border-color: rgba(0,212,255,0.3);
+  box-shadow: 0 0 50px rgba(0,212,255,0.08), 0 14px 44px rgba(0,0,0,0.35);
+}
+
+/* Skill fill */
+.skill-fill {
+  transition: width 1.5s cubic-bezier(0.4,0,0.2,1) !important;
+  position: relative;
+  overflow: visible;
+}
+/* Shimmer on fill */
+.skill-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: -1px;
+  width: 6px; height: 5px;
+  border-radius: 50%;
+  background: var(--glow);
+  box-shadow: 0 0 8px 3px rgba(0,212,255,0.7);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.skill-fill.filled::after { opacity: 1; }
+
+/* ═══════════════════════════════════════
+   PROJECT CARD ANIMATIONS
+═══════════════════════════════════════ */
+.proj-card {
+  position: relative;
+  transition:
+    transform 0.42s cubic-bezier(0.2,0,0.1,1),
+    border-color 0.4s ease,
+    box-shadow 0.4s ease,
+    filter 0.5s ease;
+  transform-origin: center bottom;
+}
+.proj-card:hover {
+  transform: translateY(-10px) scale(1.018);
+  border-color: rgba(0,212,255,0.32);
+  box-shadow:
+    0 0 60px rgba(0,212,255,0.1),
+    0 20px 60px rgba(0,0,0,0.55);
+}
+/* Mouse-tracked radial shimmer */
+.proj-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse at var(--mx,50%) var(--my,50%),
+    rgba(0,212,255,0.07), transparent 58%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.35s;
+}
+.proj-card:hover::before { opacity: 1; }
+
+/* Thumbnail zoom */
+.proj-thumb {
+  transition: transform 0.55s cubic-bezier(0.2,0,0.1,1);
+  overflow: hidden;
+}
+.proj-card:hover .proj-thumb { transform: scale(1.06); }
+
+/* ═══════════════════════════════════════
+   CONTACT CARD ANIMATIONS
+═══════════════════════════════════════ */
+.c-card {
+  transition:
+    transform 0.38s cubic-bezier(0.2,0,0.1,1),
+    border-color 0.38s ease,
+    box-shadow 0.38s ease;
+}
+.c-card:hover {
+  transform: translateY(-8px) scale(1.025);
+  border-color: rgba(0,212,255,0.4);
+  box-shadow: 0 0 40px rgba(0,212,255,0.12), 0 12px 40px rgba(0,0,0,0.4);
+}
+.c-card-icon {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.c-card:hover .c-card-icon {
+  transform: scale(1.2) rotate(-8deg);
+  box-shadow: 0 0 18px rgba(0,212,255,0.35);
+}
+
+/* ═══════════════════════════════════════
+   ABYSS CONTACT TITLE
+═══════════════════════════════════════ */
+.contact-title {
+  color: rgba(255,255,255,1.00);
+  animation: abyssReveal 4s ease-out forwards 0.6s;
+}
+@keyframes abyssReveal {
+  0%   { color: rgba(255,255,255,0.36); letter-spacing: 0.3em; }
+  60%  { letter-spacing: 0.12em; }
+  100% { color: rgba(255,255,255,0.98); letter-spacing: 0.12em; }
+}
+
+/* ═══════════════════════════════════════
+   AVAILABILITY DOT
+═══════════════════════════════════════ */
+@keyframes availPulse {
+  0%,100% { box-shadow: 0 0 5px rgba(0,230,118,0.4); }
+  50%      { box-shadow: 0 0 16px 4px rgba(0,230,118,0.75); transform: scale(1.2); }
+}
+.avail-dot { animation: availPulse 2.2s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════
+   SECTION TITLE UNDERLINE ANIMATION
+═══════════════════════════════════════ */
+.section-title::after {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s;
+}
+.section-title.line-revealed::after {
+  transform: scaleX(1);
+}
+
+/* ═══════════════════════════════════════
+   GLASS PANEL ILLUMINATION TRANSITION
+═══════════════════════════════════════ */
+.glass-panel {
+  transition:
+    filter       0.45s ease,
+    box-shadow   0.45s ease,
+    border-color 0.45s ease,
+    transform    0.4s  cubic-bezier(0.2,0,0.1,1);
+}
+.glass-panel.illuminated {
+  filter: brightness(4) !important;
+  box-shadow: 0 0 70px rgba(200,140,255,0.18), 0 0 30px rgba(0,0,0,0.4) !important;
+  border-color: rgba(200,140,255,0.3) !important;
+}
+
+/* ═══════════════════════════════════════
+   FLOATING SECTION HEADER
+═══════════════════════════════════════ */
+@keyframes sectionHeaderFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.section-header.float-anim { animation: sectionHeaderFloat 5s ease-in-out infinite; }
