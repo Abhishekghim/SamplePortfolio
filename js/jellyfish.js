@@ -58,7 +58,7 @@
     return light;
   }
 
-  function spawnJelly(level) {
+  function spawnJelly(level, inViewport = false) {
     const vw    = window.innerWidth;
     const vh    = window.innerHeight;
     const scrollY = window.scrollY;
@@ -66,13 +66,20 @@
     const edge  = randInt(0, 2); // 0=left, 1=right, 2=bottom — no top spawn, all go upward
     let startX, startY, vx, vy;
 
-    switch (edge) {
-    case 0: startX = -JELLY_SIZE-20; startY = scrollY + rand(vh*0.1, vh*0.9); vx=speed; vy=rand(-0.25, 0.25); break;
-    case 1: startX = vw+JELLY_SIZE+20; startY = scrollY + rand(vh*0.1, vh*0.9); vx=-speed; vy=rand(-0.25, 0.25); break;
-      default: // from bottom of viewport
-        startX = rand(vw * 0.1, vw * 0.9);
-        startY = scrollY + vh + JELLY_SIZE + 20;
-        vx = rand(-0.2, 0.2); vy = -speed * 0.65;
+    if (inViewport) {
+      startX = vw * rand(0.25, 0.75);
+      startY = scrollY + vh * rand(0.20, 0.55);
+      vx = rand(-0.25, 0.25);
+      vy = rand(-0.25, 0.15);
+    } else {
+      switch (edge) {
+      case 0: startX = -JELLY_SIZE-20; startY = scrollY + rand(vh*0.1, vh*0.9); vx=speed; vy=rand(-0.25, 0.25); break;
+      case 1: startX = vw+JELLY_SIZE+20; startY = scrollY + rand(vh*0.1, vh*0.9); vx=-speed; vy=rand(-0.25, 0.25); break;
+        default: // from bottom of viewport
+          startX = rand(vw * 0.1, vw * 0.9);
+          startY = scrollY + vh + JELLY_SIZE + 20;
+          vx = rand(-0.2, 0.2); vy = -speed * 0.65;
+      }
     }
 
     const el    = buildJellyEl(level);
@@ -224,7 +231,8 @@
 
     if (level >= 0) {
       if (!spawnTimer) {
-        spawnJelly(level);
+        spawnJelly(level, true);
+        if (level >= 1) spawnJelly(level, true);
         spawnTimer = setInterval(() => {
           const cur = getDeepLevel();
           if (cur < 0) { clearInterval(spawnTimer); spawnTimer = null; activeJellies.forEach(j => exitJelly(j)); return; }

@@ -18,19 +18,6 @@
     window.addEventListener('scroll', hide, { passive: true, once: true });
   }
 
-  /* ── Fish school parallax nudge on mouse move ── */
-  let lastMX = 0;
-  document.addEventListener('mousemove', e => {
-    const dx = e.clientX - lastMX;
-    lastMX = e.clientX;
-    if (Math.abs(dx) > 12) {
-      $$('.fish-dot').forEach(f => {
-        const cur = parseFloat(f.style.left) || 0;
-        f.style.left = (cur + dx * 0.08) + 'px';
-      });
-    }
-  });
-
   /* ── Nav scrolled init ── */
   const nav = $('#navbar');
   if (nav && window.scrollY > 50) nav.classList.add('scrolled');

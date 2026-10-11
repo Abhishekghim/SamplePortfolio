@@ -3,6 +3,7 @@
 /* ── Sections ── */
 .section {
   position: relative;
+  isolation: isolate;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -21,44 +22,17 @@
   flex-direction: column;
   align-items: center;
   gap: 64px;
-  color: var(--t-bright);
 }
 
-/* ── Full page darkness overlay ── */
-#full-darkness-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0);
-  z-index: 200;
-  pointer-events: none;
-  transition: background-color 0.3s ease;
-}
-.depth-surface {
-  background: linear-gradient(to bottom,
-    #87ceeb 0%, #4ba8d0 18%, #1e7fa8 38%,
-    #0d4a68 62%, #082440 85%, #041428 100%);
-}
-.depth-shallow {
-  background: linear-gradient(to bottom,
-    #041428 0%, #03101e 50%, #020c18 100%);
-}
-.depth-mid {
-  background: linear-gradient(to bottom,
-    #020c18 0%, #010a14 55%, #010710 100%);
-}
-.depth-deep {
-  background: linear-gradient(to bottom,
-    #010710 0%, #01050c 60%, #010408 100%);
-}
-.depth-abyss {
-  background: linear-gradient(to bottom,
-    #010408 0%, #010306 55%, #000204 100%);
-}
+/* ── Section backgrounds by depth ── */
+/* All section backgrounds transparent — body carries the full ocean gradient */
+.depth-surface,
+.depth-shallow,
+.depth-mid,
+.depth-deep,
+.depth-abyss,
 .depth-void {
-  background: #000102;
+  background: transparent;
 }
 
 /* ── Section header ── */

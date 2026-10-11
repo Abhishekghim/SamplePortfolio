@@ -7,8 +7,8 @@
   --sea-shallow:#0d4a68;
   --sea-mid:    #082440;
   --sea-deep:   #041428;
-  --sea-abyss:  #020810;
-  --sea-void:   #010408;
+  --sea-abyss:  #000000;
+  --sea-void:   #000000;
 
   /* ── Accent & glow ── */
   --glow:       #00d4ff;
@@ -44,5 +44,19 @@
 body {
   font-family: var(--font-body);
   color: var(--t-bright);
-  background: var(--sea-void);
+  /* Progressive ocean gradient: bright surface -> deep midnight -> pitch black at & after 600m */
+  background: linear-gradient(to bottom,
+    #87ceeb   0%,
+    #4ba8d0   4%,
+    #1e7fa8   10%,
+    #0d4a68   18%,
+    #082440   25%,
+    #041428   32%,
+    #03101e   40%,
+    #020b16   46%,
+    #01060c   52%,
+    #000204   57%,
+    #000000   60%,
+    #000000   100%
+  );
 }

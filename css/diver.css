@@ -1,51 +1,73 @@
-/* css/diver.css */
+/* css/diver.css — articulated scuba diver & dynamic bubble trail */
 #diver {
   position: fixed;
   left: 50%;
   top: 15vh;
-  z-index: 30;
+  z-index: 820;
   pointer-events: none;
   transform: translateX(-50%);
-  will-change: top, left, transform;
-  filter: drop-shadow(0 4px 16px rgba(0,80,160,0.55));
-}
-#diver svg {
-  width: 86px;
-  transition: filter 0.6s;
+  will-change: top, left, transform, opacity;
+  filter: drop-shadow(0 6px 20px rgba(0, 100, 180, 0.45));
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
 }
 
-/* Bubble animations */
-.db { animation: diverBubble ease-out infinite; }
-.db:nth-child(1) { animation-duration: 2.0s; animation-delay: 0s; }
-.db:nth-child(2) { animation-duration: 2.4s; animation-delay: 0.5s; }
-.db:nth-child(3) { animation-duration: 2.8s; animation-delay: 1.0s; }
-.db:nth-child(4) { animation-duration: 3.2s; animation-delay: 1.5s; }
-@keyframes diverBubble {
-  0%   { opacity: 0.8; transform: translateY(0) scale(1); }
-  100% { opacity: 0;   transform: translateY(-32px) scale(1.35); }
+#diver svg {
+  width: clamp(78px, 8.5vw, 98px);
+  height: auto;
+  overflow: visible;
+  transition: filter 0.6s ease;
+}
+
+/* Fin blade pivots for articulated kick */
+#diver-fin-l {
+  transform-origin: 50px 96px;
+  transition: transform 0.05s linear;
+}
+#diver-fin-r {
+  transform-origin: 64px 96px;
+  transition: transform 0.05s linear;
 }
 
 /* Trail bubbles container */
 #diver-trail {
   position: absolute;
-  top: 60px; left: 50%;
+  top: 40px;
+  left: 50%;
   transform: translateX(-50%);
   pointer-events: none;
 }
+
 .trail-b {
-  position: absolute;
+  position: fixed;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.28);
-  background: radial-gradient(circle at 35% 32%, rgba(255,255,255,0.22), transparent);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.85) 0%, rgba(120, 220, 255, 0.25) 50%, rgba(0, 160, 230, 0.05) 100%);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.35);
   animation: trailRise ease-out forwards;
-}
-@keyframes trailRise {
-  0%   { opacity: 0.7; transform: translateY(0) translateX(var(--tx,0px)); }
-  100% { opacity: 0;   transform: translateY(-90px) translateX(var(--tx,0px)); }
+  pointer-events: none;
+  z-index: 819;
 }
 
-/* Depth fade — gets dimmer as diver goes deeper */
-#diver.zone-mid  svg { filter: brightness(0.78) blur(0px); }
-#diver.zone-deep svg { filter: brightness(0.52) blur(0.4px); }
-#diver.zone-abyss svg { filter: brightness(0.30) blur(0.8px); }
-#diver.zone-void svg { filter: brightness(0.12) blur(1.2px); opacity: 0.4; }
+@keyframes trailRise {
+  0% {
+    opacity: 0.85;
+    transform: translateY(0) translateX(0) scale(0.7);
+  }
+  30% {
+    opacity: 0.75;
+    transform: translateY(calc(var(--rise, 90px) * -0.35)) translateX(calc(var(--tx, 0px) * 0.4)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(var(--rise, 90px) * -1)) translateX(var(--tx, 0px)) scale(1.45);
+  }
+}
+
+/* Depth fade & deep water illumination */
+#diver.zone-surface svg { filter: brightness(1.0) drop-shadow(0 4px 12px rgba(0, 140, 220, 0.4)); }
+#diver.zone-shallow svg { filter: brightness(0.95) drop-shadow(0 6px 16px rgba(0, 100, 180, 0.45)); }
+#diver.zone-mid     svg { filter: brightness(0.80) drop-shadow(0 6px 18px rgba(0, 70, 140, 0.5)); }
+#diver.zone-deep    svg { filter: brightness(0.62) drop-shadow(0 0 14px rgba(0, 212, 255, 0.35)); }
+#diver.zone-abyss   svg { filter: brightness(0.44) drop-shadow(0 0 20px rgba(0, 212, 255, 0.45)); }
+#diver.zone-void    svg { filter: brightness(0.28) drop-shadow(0 0 24px rgba(0, 255, 210, 0.5)); }
