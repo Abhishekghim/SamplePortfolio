@@ -45,12 +45,13 @@
       // Actively scrolling down: rotate 180°
       isScrollingDown = true;
       clearTimeout(scrollStopTimer);
+      // Delay for 0.35s (350ms) after downward scroll ceases before rotating back
       scrollStopTimer = setTimeout(() => {
         isScrollingDown = false;
         scrollSpeed = 0;
-      }, 160);
-    } else if (diff < -1) {
-      // Scrolling up: return to normal (0°)
+      }, 350);
+    } else if (diff < -2) {
+      // Explicitly scrolling up: return to normal (0°)
       isScrollingDown = false;
       clearTimeout(scrollStopTimer);
     }
@@ -68,8 +69,13 @@
     return idx;
   }
 
+  let lastTime = performance.now();
+
   function update() {
     const now = performance.now();
+    const dt = Math.max(0.001, Math.min(0.08, (now - lastTime) / 1000));
+    lastTime = now;
+
     const reduceMotion = window.OCEAN && window.OCEAN.reduceMotion;
 
     // 1. Target pitch: 180° when scrolling down, 0° (normal) when stopped
@@ -81,10 +87,15 @@
       targetPitch = 0;
     }
 
-    // Smooth rotational transition: responsive flip to 180° and clean return to 0°
-    const ease = isScrollingDown ? 0.20 : 0.14;
-    currentPitch = lerp(currentPitch, targetPitch, ease);
-    if (Math.abs(targetPitch - currentPitch) < 0.25) currentPitch = targetPitch;
+    // Time-based smooth rotation (consistent across all refresh rates & devices):
+    // - Fast responsive flip to 180° while scrolling down (k = 16, ~0.15s)
+    // - Slow, graceful glide back to 0° after the 0.35s delay (k = 4.2, ~0.8s smooth rotation)
+    const k = isScrollingDown ? 16 : 4.2;
+    const factor = 1 - Math.exp(-k * dt);
+    currentPitch += (targetPitch - currentPitch) * factor;
+
+    if (!isScrollingDown && currentPitch < 2.5) currentPitch = 0;
+    if (isScrollingDown && currentPitch > 179.5) currentPitch = 180;
 
     // 2. Center diver permanently in the middle of the viewport
     diver.style.left = '50%';
@@ -98,10 +109,11 @@
       rootGroup.style.transform = `rotate(${currentPitch}deg)`;
     }
 
-    // 4. Articulated flutter kick on fins
-    const isMoving = isScrollingDown || scrollSpeed > 2;
-    const kickFreq = reduceMotion ? 0.02 : (isMoving ? 0.22 : 0.05);
-    const kickAmp  = isMoving ? 18 : 6;
+    // 4. Articulated flutter kick on fins: active during dive, gentle during slow return
+    const isReturning = Math.abs(currentPitch - targetPitch) > 2;
+    const isMoving = isScrollingDown || isReturning || scrollSpeed > 2;
+    const kickFreq = reduceMotion ? 0.02 : (isScrollingDown ? 0.22 : (isReturning ? 0.09 : 0.04));
+    const kickAmp  = isScrollingDown ? 18 : (isReturning ? 10 : 5);
     kickPhase += kickFreq;
 
     if (finLeft && finRight && !reduceMotion) {
