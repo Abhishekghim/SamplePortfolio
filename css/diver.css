@@ -2,14 +2,13 @@
 #diver {
   position: fixed;
   left: 50%;
-  top: 15vh;
+  top: 50%;
   z-index: 820;
   pointer-events: none;
-  transform: translateX(-50%);
-  will-change: top, left, transform, opacity;
-  filter: drop-shadow(0 6px 20px rgba(0, 100, 180, 0.45));
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
   opacity: 0;
-  transition: opacity 0.2s ease-out;
+  transition: opacity 0.25s ease-out;
 }
 
 #diver svg {
@@ -64,10 +63,10 @@
   }
 }
 
-/* Depth fade & deep water illumination */
-#diver.zone-surface svg { filter: brightness(1.0) drop-shadow(0 4px 12px rgba(0, 140, 220, 0.4)); }
-#diver.zone-shallow svg { filter: brightness(0.95) drop-shadow(0 6px 16px rgba(0, 100, 180, 0.45)); }
-#diver.zone-mid     svg { filter: brightness(0.80) drop-shadow(0 6px 18px rgba(0, 70, 140, 0.5)); }
-#diver.zone-deep    svg { filter: brightness(0.62) drop-shadow(0 0 14px rgba(0, 212, 255, 0.35)); }
-#diver.zone-abyss   svg { filter: brightness(0.44) drop-shadow(0 0 20px rgba(0, 212, 255, 0.45)); }
-#diver.zone-void    svg { filter: brightness(0.28) drop-shadow(0 0 24px rgba(0, 255, 210, 0.5)); }
+/* Subtle depth shading without any glow */
+#diver.zone-surface svg { filter: brightness(1.0); }
+#diver.zone-shallow svg { filter: brightness(0.98); }
+#diver.zone-mid     svg { filter: brightness(0.92); }
+#diver.zone-deep    svg { filter: brightness(0.85); }
+#diver.zone-abyss   svg { filter: brightness(0.78); }
+#diver.zone-void    svg { filter: brightness(0.70); }

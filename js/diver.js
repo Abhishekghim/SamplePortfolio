@@ -1,11 +1,9 @@
-/* js/diver.js — kinematic scroll-driven diver animation.
-   Reliably detects scroll direction and velocity with exponential smoothing.
-   - Downward Dive: Smoothly rotates head-down into a streamlined dive pose (40°–58°),
-     initiates active flutter kick cycle on fins, bubbles stream upward.
-   - Upward Swim: Smoothly rotates toward the surface (-38°–-54°), head pointing up,
-     natural upward kick cycle, bubbles trail upward/backward.
-   - Neutral Drift: Eases to relaxed horizontal trim (-4°–+8°) with ocean swell bobbing.
-   - Continuous dampening prevents snapping or jitter during rapid scroll reversals. */
+/* js/diver.js — kinematic scroll-driven scuba diver.
+   - Always stays centered in the middle of the viewport.
+   - No glowing halos or fuzzy drop-shadows.
+   - Scroll Down: smoothly rotates 180° into a head-first downward dive pose with active fin kicking.
+   - Stopped: smoothly rotates back to normal (0° upright trim).
+   - Dynamic trail bubbles emerge naturally from the regulator and float upward. */
 'use strict';
 (function initDiver() {
   const diver = $('#diver');
@@ -13,10 +11,9 @@
   if (!diver) return;
 
   const sections = $$('section[data-depth]');
-  const yMap = [14, 26, 40, 56, 70, 85];
   const zoneClasses = ['zone-surface','zone-shallow','zone-mid','zone-deep','zone-abyss','zone-void'];
 
-  // Cache SVG elements for articulated fin flutter kick
+  // Cache SVG elements for articulated fin kick and body rotation
   let rootGroup = null;
   let finLeft   = null;
   let finRight  = null;
@@ -28,100 +25,83 @@
   }
   initDiverElements();
 
-  let currentX       = window.innerWidth / 2;
-  let targetX        = window.innerWidth / 2;
-  let currentY       = window.innerHeight * 0.15;
-  let targetY        = window.innerHeight * 0.15;
-  let currentPitch   = 10;   // degrees
-  let targetPitch    = 10;   // degrees
+  let currentPitch   = 0;     // degrees: 0 = upright (normal), 180 = diving down
+  let targetPitch    = 0;
   let kickPhase      = 0;
-  let swayAngle      = 0;
   let lastTrail      = 0;
 
-  // Velocity tracking
-  let lastScrollY    = window.scrollY;
-  let lastTime       = performance.now();
-  let smoothVelocity = 0;   // px / sec (positive = descending, negative = ascending)
+  // Real scroll tracking: detect downward scroll vs stopped
+  let isScrollingDown = false;
+  let scrollStopTimer = null;
+  let lastScrollY = window.scrollY;
+  let scrollSpeed = 0;
 
-  function getSectionInfo() {
-    let idx = 0, inSec = 0;
+  window.addEventListener('scroll', () => {
+    const sy = window.scrollY;
+    const diff = sy - lastScrollY;
+    scrollSpeed = Math.abs(diff);
+
+    if (diff > 1) {
+      // Actively scrolling down: rotate 180°
+      isScrollingDown = true;
+      clearTimeout(scrollStopTimer);
+      scrollStopTimer = setTimeout(() => {
+        isScrollingDown = false;
+        scrollSpeed = 0;
+      }, 160);
+    } else if (diff < -1) {
+      // Scrolling up: return to normal (0°)
+      isScrollingDown = false;
+      clearTimeout(scrollStopTimer);
+    }
+
+    lastScrollY = sy;
+  }, { passive: true });
+
+  function getActiveSectionIndex() {
+    let idx = 0;
+    const vh = window.innerHeight;
     sections.forEach((s, i) => {
       const rect = s.getBoundingClientRect();
-      const progress = clamp(-rect.top / rect.height, 0, 1);
-      if (rect.top <= window.innerHeight * 0.45) {
-        idx = i;
-        inSec = progress;
-      }
+      if (rect.top <= vh * 0.5) idx = i;
     });
-    return { idx, inSec };
+    return idx;
   }
 
   function update() {
     const now = performance.now();
-    const dt = Math.max(0.001, Math.min(0.1, (now - lastTime) / 1000));
-    lastTime = now;
-
-    const scrollY = window.scrollY;
-    const instantVelocity = (scrollY - lastScrollY) / dt;
-    lastScrollY = scrollY;
-
-    // Exponential smoothing on velocity (rejects trackpad noise and jitter)
-    smoothVelocity += (instantVelocity - smoothVelocity) * 0.14;
-
-    const { idx, inSec } = getSectionInfo();
-    const nextIdx = Math.min(idx + 1, yMap.length - 1);
-
-    // 1. Vertical position interpolation between depth zones
-    const yVh = lerp(yMap[idx], yMap[nextIdx], inSec);
-    targetY = (yVh / 100) * window.innerHeight;
-    currentY = lerp(currentY, targetY, 0.08);
-
-    // 2. Horizontal oceanic current sway & neutral breathing bob
-    swayAngle += 0.012;
-    const swellX = Math.sin(swayAngle) * 26 + Math.cos(swayAngle * 0.6) * 12;
-    const swellY = Math.sin(swayAngle * 1.6) * 6; // breathing buoyancy
-    targetX = window.innerWidth / 2 + swellX;
-    currentX = lerp(currentX, targetX, 0.045);
-
-    diver.style.top  = (currentY + swellY) + 'px';
-    diver.style.left = currentX + 'px';
-
-    // 3. Scroll Direction & Kinematic Pitch
-    // Descending (> 30 px/s): pitch down head-first (+35° to +58°)
-    // Ascending (< -30 px/s): pitch up toward surface (-35° to -54°)
-    // Neutral (idle): ease to relaxed horizontal trim (-4° to +8°)
-    const speed = Math.abs(smoothVelocity);
     const reduceMotion = window.OCEAN && window.OCEAN.reduceMotion;
 
+    // 1. Target pitch: 180° when scrolling down, 0° (normal) when stopped
     if (reduceMotion) {
       targetPitch = 0;
-    } else if (smoothVelocity > 35) {
-      const diveIntensity = clamp((smoothVelocity - 35) / 500, 0, 1);
-      targetPitch = 38 + diveIntensity * 20; // 38° -> 58° downward dive
-    } else if (smoothVelocity < -35) {
-      const riseIntensity = clamp((-smoothVelocity - 35) / 500, 0, 1);
-      targetPitch = -36 - riseIntensity * 18; // -36° -> -54° upward swim
+    } else if (isScrollingDown) {
+      targetPitch = 180;
     } else {
-      // Neutral buoyancy horizontal trim with slight water current sway
-      targetPitch = 4 + Math.sin(swayAngle * 0.8) * 5;
+      targetPitch = 0;
     }
 
-    // Smooth rotational damping (prevents jarring snaps on rapid reversal)
-    const rotSpeed = speed > 100 ? 0.09 : 0.06;
-    currentPitch = lerp(currentPitch, targetPitch, rotSpeed);
+    // Smooth rotational transition: responsive flip to 180° and clean return to 0°
+    const ease = isScrollingDown ? 0.20 : 0.14;
+    currentPitch = lerp(currentPitch, targetPitch, ease);
+    if (Math.abs(targetPitch - currentPitch) < 0.25) currentPitch = targetPitch;
 
-    // 4. Articulated Flutter Kick on Fins
+    // 2. Center diver permanently in the middle of the viewport
+    diver.style.left = '50%';
+    diver.style.top  = '50%';
+    diver.style.transform = 'translate(-50%, -50%)';
+
+    // 3. Rotate diver around its exact geometric center (60px, 90px in 120x180 viewBox)
     if (!rootGroup) initDiverElements();
-
     if (rootGroup) {
-      // Rotate diver around center of mass (60px, 75px)
-      rootGroup.style.transformOrigin = '60px 75px';
+      rootGroup.style.transformOrigin = '60px 90px';
       rootGroup.style.transform = `rotate(${currentPitch}deg)`;
     }
 
-    // Kick frequency & amplitude scale with swimming speed
-    const kickFreq = reduceMotion ? 0.02 : 0.05 + clamp(speed / 350, 0, 1) * 0.22;
-    const kickAmp  = 6 + clamp(speed / 300, 0, 1) * 16; // 6° idle -> 22° active kick
+    // 4. Articulated flutter kick on fins
+    const isMoving = isScrollingDown || scrollSpeed > 2;
+    const kickFreq = reduceMotion ? 0.02 : (isMoving ? 0.22 : 0.05);
+    const kickAmp  = isMoving ? 18 : 6;
     kickPhase += kickFreq;
 
     if (finLeft && finRight && !reduceMotion) {
@@ -132,40 +112,44 @@
     }
 
     // 5. Zone class & Depth filtering
+    const secIdx = getActiveSectionIndex();
     zoneClasses.forEach(c => diver.classList.remove(c));
-    diver.classList.add(zoneClasses[idx] || 'zone-surface');
+    diver.classList.add(zoneClasses[secIdx] || 'zone-surface');
 
-    // 6. Waterline fade-in (diver only appears underwater)
+    // 6. Waterline fade-in (diver appears smoothly when submerged below surface)
     const submerged = (window.OCEAN && window.OCEAN.frame.submerged) || 0;
     diver.style.opacity = submerged.toFixed(3);
 
-    // 7. Dynamic Trail Bubbles
-    const prog = scrollProgress();
-    const bubbleInterval = speed > 100 ? 240 : 450;
-    if (now - lastTrail > bubbleInterval && prog < 0.90 && submerged > 0.08) {
-      spawnTrailBubble(currentX, currentY, currentPitch, smoothVelocity);
+    // 7. Dynamic trail bubbles
+    const bubbleInterval = isMoving ? 240 : 500;
+    if (now - lastTrail > bubbleInterval && submerged > 0.08) {
+      spawnTrailBubble(currentPitch, isMoving);
       lastTrail = now;
     }
   }
 
-  function spawnTrailBubble(x, y, pitch, vel) {
+  function spawnTrailBubble(pitch, isMoving) {
     if (!trail) return;
     const b = document.createElement('div');
     b.className = 'trail-b';
-    const size = rand(5, 11);
+    const size = rand(5, 10);
+
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
 
     // Bubbles emerge near regulator mouth / head
+    // Head is ~38px from center along rotation vector
     const rad = (pitch * Math.PI) / 180;
-    const headOffX = Math.sin(rad) * 22;
-    const headOffY = -Math.cos(rad) * 22;
+    const headOffX = Math.sin(rad) * 38;
+    const headOffY = -Math.cos(rad) * 38;
 
-    const spawnX = x + headOffX + rand(-6, 6);
-    const spawnY = y + headOffY + rand(-4, 4);
+    const spawnX = cx + headOffX + rand(-5, 5);
+    const spawnY = cy + headOffY + rand(-3, 3);
 
-    // Bubbles always rise upward with buoyant wobble
-    const tx = rand(-22, 22) + (vel > 0 ? -Math.sin(rad) * 18 : 0);
-    const riseDist = rand(70, 130);
-    const dur = rand(1.8, 2.8);
+    // Bubbles always float upward to surface
+    const tx = rand(-18, 18);
+    const riseDist = rand(70, 120);
+    const dur = rand(1.6, 2.6);
 
     b.style.cssText = `
       position:fixed;
